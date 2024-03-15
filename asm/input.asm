@@ -1,43 +1,38 @@
 .model small
 .stack 100h
-
 .data
-    numbers db 6 dup(0)
-
+buffer db 80h dup(?)
 .code
-main PROC
+main proc
     mov ax, @data
     mov ds, ax
 
-    mov cx, 6
-    lea si, numbers
-read_loop:
-    call read_number
-    mov [si], al
-    inc si
-    loop read_loop
+    ; Підготовка регістрів для функції 3Fh (читання з файлу)
+    mov ah, 3Fh       ; Функція DOS для читання з файлу
+    mov bx, 0         ; Handle stdin
+    lea dx, buffer    ; Вказівник на буфер, куди будуть зчитуватися дані
+    mov cx, 80h       ; Читати 128 байтів (максимальна довжина рядка у DOS)
+    int 21h           ; Виклик DOS-інтерапту
+    ; AX тепер містить кількість байтів, що були прочитані
 
-    mov cx, 6
-    lea si, numbers
+    ; Перевірка на кінець файлу (EOF)
+    cmp ax, cx
+    jae display       ; Якщо прочитано стільки ж байтів або більше
+    mov cx, ax        ; Якщо прочитано менше, корегуємо CX для виведення
+
+display:
+    mov ah, 02h       ; Функція DOS для виведення символу
+    mov si, 0         ; Встановлюємо SI на початок буфера
+
 print_loop:
-    mov dl, [si]
-    add dl, '0'
-    mov ah, 02h
-    int 21h
-    inc si
-    loop print_loop
-    jmp program_end
+    mov dl, buffer[si]; Вставляємо символ для виведення
+    int 21h           ; Виводимо символ
+    inc si            ; Наступний символ
+    loop print_loop   ; Повторюємо, поки CX не дорівнюватиме 0
 
-read_number:
-    xor ax, ax
-    mov ah, 01h
-    int 21h
-    sub al, '0'
-    ret
-
-program_end:
-    mov ax, 4c00h
+    ; Завершення програми і повернення до DOS
+    mov ax, 4C00h
     int 21h
 
-main ENDP
-END main
+main endp
+end main
