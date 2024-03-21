@@ -1,7 +1,9 @@
 .model small
 .stack 100h
 .data
-buffer db 80h dup(?)
+buffer db 0FFh dup(?) ; буфер для вводу
+numBuffer db 10000 dup(?) ; буфер для чисел
+numCount dw 0 ; кількість чисел
 .code
 main proc
     mov ax, @data
@@ -11,12 +13,12 @@ main proc
     mov ah, 3Fh       ; Функція DOS для читання з файлу
     mov bx, 0         ; Handle stdin
     lea dx, buffer    ; Вказівник на буфер, куди будуть зчитуватися дані
-    mov cx, 80h       ; Читати 128 байтів (максимальна довжина рядка у DOS)
+    mov cx, 0FFh      ; Максимальна кількість байтів для зчитування
     int 21h           ; Виклик DOS-інтерапту
     ; AX тепер містить кількість байтів, що були прочитані
 
     ; Перевірка на кінець файлу (EOF)
-    cmp ax, cx
+    cmp ax, cx 	      ; Порівнюємо кількість прочитаних байтів з максимальною кількістю
     jae display       ; Якщо прочитано стільки ж байтів або більше
     mov cx, ax        ; Якщо прочитано менше, корегуємо CX для виведення
 
@@ -33,6 +35,7 @@ print_loop:
     ; Завершення програми і повернення до DOS
     mov ax, 4C00h
     int 21h
+
 
 main endp
 end main
