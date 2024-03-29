@@ -3,42 +3,42 @@ import java.util.*;
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        List<String> binaryNumbers = new ArrayList<>();
+        List<Short> numbers = new ArrayList<>();
 
         while (scanner.hasNextInt()) {
             int number = scanner.nextInt();
-            number = Math.max(Short.MIN_VALUE, Math.min(Short.MAX_VALUE, number));
-            String binary = Integer.toBinaryString(0xFFFF & number);
-            while (binary.length() < 16) {
-                binary = "0" + binary;
-            }
-            binaryNumbers.add(binary);
+            short boundedNumber = (short)Math.max(Short.MIN_VALUE, Math.min(Short.MAX_VALUE, number));
+            numbers.add(boundedNumber);
         }
 
-        for (int i = 0; i < binaryNumbers.size() - 1; i++) {
-            for (int j = 0; j < binaryNumbers.size() - i - 1; j++) {
-                if (binaryNumbers.get(j).compareTo(binaryNumbers.get(j + 1)) > 0) {
-                    Collections.swap(binaryNumbers, j, j + 1);
+        boolean sorted = false;
+        short temp;
+        while (!sorted) {
+            sorted = true;
+            for (int i = 0; i < numbers.size() - 1; i++) {
+                if (numbers.get(i) > numbers.get(i + 1)) {
+                    temp = numbers.get(i);
+                    numbers.set(i, numbers.get(i + 1));
+                    numbers.set(i + 1, temp);
+                    sorted = false;
                 }
             }
         }
 
-
         double median;
-        if (binaryNumbers.size() % 2 == 0) {
-            int m1 = Integer.parseInt(binaryNumbers.get(binaryNumbers.size() / 2 - 1), 2);
-            int m2 = Integer.parseInt(binaryNumbers.get(binaryNumbers.size() / 2), 2);
+        if (numbers.size() % 2 == 0) {
+            int m1 = numbers.get(numbers.size() / 2 - 1);
+            int m2 = numbers.get(numbers.size() / 2);
             median = (m1 + m2) / 2.0;
         } else {
-            median = Integer.parseInt(binaryNumbers.get(binaryNumbers.size() / 2), 2);
+            median = numbers.get(numbers.size() / 2);
         }
-
 
         double sum = 0;
-        for (String binary : binaryNumbers) {
-            sum += Integer.parseInt(binary, 2);
+        for (short num : numbers) {
+            sum += num;
         }
-        double average = sum / binaryNumbers.size();
+        double average = sum / numbers.size();
 
         System.out.println((int) median);
         System.out.printf("%.0f\n", average);
